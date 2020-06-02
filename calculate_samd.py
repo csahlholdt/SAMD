@@ -17,7 +17,7 @@ tau_grid = data['tau_grid']
 feh_grid = data['feh_grid']
 
 # Estimate the SAMD.
-print('Calculating SAMD...')
+print('Calculating SAMD, this may take a few minutes...')
 samd = sf.estimate_samd(gfuncs, tau_grid, feh_grid, case='2D',
                         betas=betas, alpha=alpha)[0]
 # Plot the SAMD. samd is a list containing the SAMD for each value of beta.
@@ -31,7 +31,7 @@ sf.plot_age_metallicity_distribution(samd[-1], tau_grid, feh_grid)
 # 1D age distributions to estimate the SAD.
 gfuncs = np.sum(gfuncs, axis=2)
 
-# We use the same value for alpha which works in this case,
+# We use the same value for alpha which works in this example,
 # but this is not always the case.
 print('Calculating SAD...')
 samd = sf.estimate_samd(gfuncs, tau_grid, case='1D',

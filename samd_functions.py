@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib.style as mpls
 mpls.use('classic')
 
+
 def estimate_samd(gfuncs, tau_grid, feh_grid=None, case='1D',
                   betas=None, alpha=0,
                   grid_slice=None, grid_thin=None,
-                  max_iter=1, min_tol=1.e-20):
+                  max_iter=1, min_tol=1.e-5):
     '''
     Function for estimating the sample age-metallicity distribution (SAMD) OR
     simply the sample age distribution (SAD).
@@ -77,7 +78,7 @@ def estimate_samd(gfuncs, tau_grid, feh_grid=None, case='1D',
 
     min_tol : float, optional
         Minimum value that the SAMD/SAD is allowed to reach.
-        Default value is 1e-20.
+        Default value is 1e-5.
 
     Returns
     -------
@@ -205,7 +206,7 @@ def estimate_samd(gfuncs, tau_grid, feh_grid=None, case='1D',
             u[u == 0] = 1 # Avoid division by zero
             # Gwu = Gw matrix with each row divided by u(i)
             Gwu = Gw / u[:, np.newaxis]
-            # Twu = Tw matrix with each row multiplied by v(k)
+            # Twv = Tw matrix with each row multiplied by v(k)
             Twv = Tw * v[:, np.newaxis]
 
             # Residuals
@@ -234,19 +235,20 @@ def estimate_samd(gfuncs, tau_grid, feh_grid=None, case='1D',
                 finished = True
                 break
 
+            # Solve for Delta_phi and Delta_lambda
             Delta1 = np.linalg.solve(M1, h1)
             Delta = np.dot(S, Delta1)
-
             Delta_phi = Delta[:k]
             Delta_lambda = Delta[-1]
 
+            # Apply Delta_phi such that all phi remain > 0
             f = 1.
             phi_test = phi + f * Delta_phi
             while min(phi_test) < 0:
                 f *= 0.5
                 phi_test = phi + f * Delta_phi
             phi = phi_test
-            lamda += f * Delta_lambda
+            lamda += f * Delta_lambda # Apply Delta_lambda
 
             phi[phi < min_tol] = min_tol
             if beta >= beta_max:
